@@ -720,7 +720,7 @@ class _EnquiryScreenState extends State<EnquiryScreen>
       },
     );
   }
-    }
+}
 //   void _showCustomFlash({FlashBehavior style = FlashBehavior.fixed}) {
 //     showFlash(
 //       context: context,

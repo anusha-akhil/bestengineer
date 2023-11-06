@@ -8,6 +8,7 @@ import 'package:bestengineer/controller/registrationController.dart';
 import 'package:bestengineer/screen/Dashboard/adminDahsboard.dart';
 import 'package:bestengineer/screen/Dashboard/serviceDashboard.dart';
 import 'package:bestengineer/screen/Enquiry/EnqHistory.dart';
+import 'package:bestengineer/screen/Enquiry/daily_report.dart.dart';
 import 'package:bestengineer/screen/Enquiry/enquiryScreen.dart';
 import 'package:bestengineer/screen/Enquiry/enqcart.dart';
 import 'package:bestengineer/screen/Enquiry/enquiry_schedule.dart';
@@ -229,6 +230,15 @@ class _EnqHomeState extends State<EnqHome> {
           // Provider.of<ProductController>(context, listen: false)
           //     .geProductList(context);
           return EnquiryScreen();
+        }
+
+      case "DLR":
+        {
+          Provider.of<Controller>(context, listen: false).fromDate =todaydate.toString();
+          Provider.of<Controller>(context, listen: false).dailyReport(context);
+          Provider.of<Controller>(context, listen: false)
+              .getdailyReport(context,todaydate.toString());
+          return DailyReport();
         }
       case "E2":
         {
@@ -787,7 +797,8 @@ class _EnqHomeState extends State<EnqHome> {
                               Provider.of<RegistrationController>(context, listen: false).menu_index == "AP1" ||
                               Provider.of<RegistrationController>(context, listen: false).menu_index == "CQ1" ||
                               Provider.of<RegistrationController>(context, listen: false).menu_index == "SA1" ||
-                              Provider.of<RegistrationController>(context, listen: false).menu_index == "SA"
+                              Provider.of<RegistrationController>(context, listen: false).menu_index == "SA" ||
+                              Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR"
                           ? Container()
                           : InkWell(
                               onTap: () {
@@ -869,8 +880,10 @@ class _EnqHomeState extends State<EnqHome> {
                                                                               ? "APPROVE SALE ORDER"
                                                                               : Provider.of<RegistrationController>(context, listen: false).menu_index == "SA"
                                                                                   ? "SALE ORDER"
-                                                                                  : "",
-                      style: TextStyle(fontSize: 15),
+                                                                                  : Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR"
+                                                                                      ? "DAILY REPORT"
+                                                                                      : "",
+                      style: TextStyle(fontSize: 15, color: Colors.white),
                     ),
                     backgroundColor: Provider.of<RegistrationController>(context, listen: false).menu_index == "E2" ||
                             Provider.of<RegistrationController>(context, listen: false).menu_index ==
@@ -902,7 +915,8 @@ class _EnqHomeState extends State<EnqHome> {
                             Provider.of<RegistrationController>(context, listen: false).menu_index == "CQ1" ||
                             Provider.of<RegistrationController>(context, listen: false).menu_index == "AP1" ||
                             Provider.of<RegistrationController>(context, listen: false).menu_index == "SA1" ||
-                            Provider.of<RegistrationController>(context, listen: false).menu_index == "SA"
+                            Provider.of<RegistrationController>(context, listen: false).menu_index == "SA" ||
+                            Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR"
                         ? P_Settings.loginPagetheme
                         : P_Settings.whiteColor,
                     elevation: 1,
@@ -926,7 +940,9 @@ class _EnqHomeState extends State<EnqHome> {
                                         value.menu_index == "AP1" ||
                                         value.menu_index == "CQ1" ||
                                         value.menu_index == "SA1" ||
-                                        value.menu_index == "SA"
+                                        value.menu_index == "SA"||
+                                        value.menu_index == "DLR"
+
                                     ? P_Settings.whiteColor
                                     : Colors.grey[800]));
                       },
@@ -1223,7 +1239,6 @@ class _EnqHomeState extends State<EnqHome> {
                           // Provider.of<Controller>(context, listen: false)
                           //     .loadReportData(context, tabId, value.fromDate!,
                           //         value.todate!, value.brId!, "");
-
                           Navigator.pop(context);
                         },
                         child: Text("Apply"))

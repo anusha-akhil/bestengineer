@@ -5,12 +5,9 @@ import 'package:bestengineer/model/areaModel.dart';
 import 'package:bestengineer/model/priorityListModel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../model/customerListModel.dart';
 import '../screen/Quotation/statusMonitoringQuotation.dart';
 import '../services/dbHelper.dart';
@@ -23,7 +20,7 @@ class Controller extends ChangeNotifier {
   String? totService;
   String? talukSelected;
   String? panchayatSelected;
-
+  String? fromDate;
   String? areaId;
   String? talukId;
   String? panId;
@@ -39,6 +36,7 @@ class Controller extends ChangeNotifier {
   // String? todate;
   String urlgolabl = Globaldata.apiglobal;
   String commonurlgolabl = Globaldata.commonapiglobal;
+  bool isdailyreportLoading = false;
 
   bool isLoading = false;
   bool isListLoading = false;
@@ -59,6 +57,7 @@ class Controller extends ChangeNotifier {
   String? dupcustomer_id;
 
   List<Map<String, dynamic>> enqDataList = [];
+  List<Map<String, dynamic>> dailyReportList = [];
   // List<Map<String, dynamic>> productList = [];
   // List<Map<String, dynamic>> customerList = [];
   List<TextEditingController> qty = [];
@@ -75,6 +74,7 @@ class Controller extends ChangeNotifier {
   List<PriorityLevel> priorityList = [];
 
   List<Map<String, dynamic>> customerList = [];
+  List<Map<String, dynamic>> customerListFordailyReport = [];
 
   ///////////////////////////////////////////////////////////////////////
 
@@ -388,10 +388,8 @@ class Controller extends ChangeNotifier {
             'landmark': landmark2
           };
           print("customer body--$body");
-
           http.Response response = await http.post(url, body: body);
           var map = jsonDecode(response.body);
-
           print("customerRespo----$map");
           dupcustomer_id = map[0]["te_id"];
           customer_id = map[0]["cust_id"];
@@ -401,7 +399,6 @@ class Controller extends ChangeNotifier {
           landmark = map[0]["landmark"];
           address = map[0]["cust_info"];
           notifyListeners();
-
           isSavecustomer = false;
           notifyListeners();
         } catch (e) {
@@ -490,6 +487,124 @@ class Controller extends ChangeNotifier {
         } catch (e) {
           print(e);
           // return null;
+          return [];
+        }
+      }
+    });
+  }
+
+  ///////////////////////////////////////////////////////////////
+  dailyReport(BuildContext context) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          Uri url = Uri.parse("$urlgolabl/customer_list_all.php");
+          http.Response response = await http.post(
+            url,
+          );
+          var map = jsonDecode(response.body);
+
+          customerListFordailyReport.clear();
+          for (var item in map["customer_list"]) {
+            customerListFordailyReport.add(item);
+          }
+          notifyListeners();
+        } catch (e) {
+          print(e);
+          return [];
+        }
+      }
+    });
+  }
+
+/////////////////////////////////////////////////////////////////
+  saveDailyReport(
+      BuildContext context,
+      String cus_id,
+      String cust_name,
+      String ph,
+      String addr,
+      String date,
+      String remrk,
+      String hidd,
+      String row) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          // print("hdgjhsfss");
+          Uri url = Uri.parse("$urlgolabl/save_daily_rpt.php");
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+
+          Map body = {
+            "customer_id": cus_id,
+            "customer_name": cust_name,
+            "phone": ph,
+            "cust_addrs": addr,
+            "r_date": date,
+            "remark": remrk,
+            "branch_id": branch_id,
+            "hidden_status": hidd,
+            "staff_id": user_id,
+            "row_id": row,
+          };
+
+          print("save da map====$body");
+          http.Response response = await http.post(url, body: body);
+          var map = jsonDecode(response.body);
+          print("save daily report--$map");
+          if (map["flag"] == 0) {
+            Fluttertoast.showToast(
+              msg: map["msg"],
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 14.0,
+              backgroundColor: Colors.green,
+            );
+          }
+          // dailyReportList.clear();
+          // for (var item in map["customer_list"]) {
+          //   dailyReportList.add(item);
+          // }
+          notifyListeners();
+        } catch (e) {
+          print(e);
+          return [];
+        }
+      }
+    });
+  }
+
+/////////////////////////////////////////////////////////////////
+  getdailyReport(BuildContext context, String date) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          isdailyreportLoading = true;
+          notifyListeners();
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+          Map body = {"staff_id": user_id, "r_date": date};
+          print("hdgjhsfss----------$body");
+          Uri url = Uri.parse("$urlgolabl/daily_report_list.php");
+          http.Response response = await http.post(url, body: body);
+          var map = jsonDecode(response.body);
+          print("daily report-list----$map");
+          dailyReportList.clear();
+          if (map.length != 0) {
+            for (var item in map) {
+              dailyReportList.add(item);
+            }
+          }
+          notifyListeners();
+          isdailyreportLoading = false;
+          notifyListeners();
+        } catch (e) {
+          print(e);
           return [];
         }
       }
@@ -726,7 +841,7 @@ class Controller extends ChangeNotifier {
     });
   }
 
-  resetPassword(BuildContext context, String pass,TextEditingController text) {
+  resetPassword(BuildContext context, String pass, TextEditingController text) {
     NetConnection.networkConnection(context).then((value) async {
       if (value == true) {
         try {
@@ -771,5 +886,9 @@ class Controller extends ChangeNotifier {
       }
     });
     return 1;
+  }
+  setDate(String date){
+    fromDate=date;
+    notifyListeners();
   }
 }
