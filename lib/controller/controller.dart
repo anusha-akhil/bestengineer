@@ -555,6 +555,8 @@ class Controller extends ChangeNotifier {
           var map = jsonDecode(response.body);
           print("save daily report--$map");
           if (map["flag"] == 0) {
+
+            
             Fluttertoast.showToast(
               msg: map["msg"],
               toastLength: Toast.LENGTH_SHORT,
