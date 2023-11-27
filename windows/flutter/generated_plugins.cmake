@@ -16,6 +16,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   printing
   rive_common
   share_plus
+  smart_auth
   url_launcher_windows
 )
 

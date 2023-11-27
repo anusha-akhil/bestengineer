@@ -14,7 +14,7 @@ class NextSchedulePopup {
   var cusout;
   String? custId;
   Future buildPendingPopup(BuildContext context, Size size, String form_id,
-      String c_id, String type, String date) {
+      String c_id, String type, String date,String alert_type) {
     // todaydate = DateFormat('dd-MM-yyyy').format(DateTime.now());
     return showDialog(
         useSafeArea: true,
@@ -62,12 +62,18 @@ class NextSchedulePopup {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(left:13.0),
-                              child: Text("Executive  :",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                              padding: const EdgeInsets.only(left: 13.0),
+                              child: Text(
+                                "Executive  :",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(
+                          height: 10,
+                        ),
                         Container(
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
@@ -122,12 +128,16 @@ class NextSchedulePopup {
                         SizedBox(
                           height: size.height * 0.01,
                         ),
-                          Row(
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(left:13.0),
-                              child: Text("Select Date :",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                              padding: const EdgeInsets.only(left: 13.0),
+                              child: Text(
+                                "Select Date :",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ],
                         ),
@@ -184,16 +194,17 @@ class NextSchedulePopup {
 
             actions: <Widget>[
               Padding(
-                padding: const EdgeInsets.only(bottom:8.0),
+                padding: const EdgeInsets.only(bottom: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Consumer<QuotationController>(
                       builder: (context, value, child) => Container(
-                        width: size.width*0.2,
+                        // width: size.width * 0.2,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: P_Settings.loginPagetheme),
-                          child: const Text('SAVE'),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: P_Settings.loginPagetheme),
+                          child: const Text('SAVE',style: TextStyle(color: Colors.white),),
                           // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           // textColor: Theme.of(context).accentColor,
                           onPressed: () {
@@ -213,7 +224,7 @@ class NextSchedulePopup {
                               Provider.of<QuotationController>(context,
                                       listen: false)
                                   .saveNextScheduleDate(
-                                      d.toString(), form_id, c_id, context, id);
+                                      d.toString(), form_id, c_id, context, id,alert_type);
                             } else {
                               Provider.of<QuotationController>(context,
                                       listen: false)
@@ -227,14 +238,6 @@ class NextSchedulePopup {
                   ],
                 ),
               ),
-              // ElevatedButton(
-              //   child: const Text('OK'),
-              //   // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              //   // textColor: Theme.of(context).accentColor,
-              //   onPressed: () {
-              //     //widget.onOk();
-              //   },
-              // ),
             ],
           );
         });

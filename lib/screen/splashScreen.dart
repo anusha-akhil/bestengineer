@@ -4,6 +4,7 @@ import 'package:bestengineer/controller/quotationController.dart';
 import 'package:bestengineer/controller/registrationController.dart';
 import 'package:bestengineer/screen/Enquiry/enqHome.dart';
 import 'package:bestengineer/screen/registration%20and%20login/login.dart';
+import 'package:bestengineer/screen/registration%20and%20login/otp_page.dart';
 import 'package:bestengineer/screen/registration%20and%20login/registration.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   String? cid;
   String? st_uname;
   String? st_pwd;
+  String? otp;
 
   navigate() async {
     await Future.delayed(Duration(seconds: 3), () async {
@@ -29,6 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
       cid = prefs.getString("cid");
       st_uname = prefs.getString("st_uname");
       st_pwd = prefs.getString("st_pwd");
+      otp = prefs.getString("otp");
       String? mobile_menu_type = prefs.getString("mobile_user_type");
       Navigator.push(
           context,
@@ -37,12 +40,15 @@ class _SplashScreenState extends State<SplashScreen> {
               pageBuilder: (_, __, ___) {
                 if (cid != null) {
                   if (st_uname != null && st_pwd != null) {
-                     
                     return EnqHome(
                       mobile_menu_type: mobile_menu_type,
                     );
                   } else {
-                    return LoginPage();
+                    if (otp != null) {
+                      return LoginPage();
+                    } else {
+                      return OtpPage();
+                    }
                   }
                 } else {
                   return RegistrationScreen();

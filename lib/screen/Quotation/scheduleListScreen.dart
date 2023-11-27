@@ -4,9 +4,11 @@ import 'package:bestengineer/controller/quotationController.dart';
 import 'package:bestengineer/controller/registrationController.dart';
 import 'package:bestengineer/pdftest/pdfPreview.dart';
 import 'package:bestengineer/screen/Enquiry/enqHome.dart';
+import 'package:bestengineer/screen/Quotation/quot_chat.dart';
 import 'package:bestengineer/widgets/alertCommon/savePopup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -380,8 +382,9 @@ class _ScheduleListScreenState extends State<ScheduleListScreen> {
                   Padding(
                     padding: const EdgeInsets.all(3),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // SizedBox(width: 10),
                         // InkWell(
                         //     onTap: () {
                         //       // SavePopup popup=SavePopup();
@@ -416,6 +419,37 @@ class _ScheduleListScreenState extends State<ScheduleListScreen> {
                         //         ),
                         //       ),
                         //     )),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => QuotChat(
+                                        inv_id: list["s_invoice_id"].toString(),
+                                        title: list["s_invoice_no"].toString(),
+                                      )),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                "Add Remark",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              SizedBox(
+                                width: 4,
+                              ),
+                              Image.asset(
+                                "assets/chat.png",
+                                // color: Colors.green,
+                                height: 20,
+                              )
+                            ],
+                          ),
+                        ),
                         InkWell(
                             onTap: () {
                               VisitedRemarkSheet visited = VisitedRemarkSheet();

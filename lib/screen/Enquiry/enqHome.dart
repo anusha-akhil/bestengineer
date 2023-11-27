@@ -17,6 +17,7 @@ import 'package:bestengineer/screen/Quotation/scheduleListScreen.dart';
 import 'package:bestengineer/screen/Quotation/test.dart';
 import 'package:bestengineer/screen/registration%20and%20login/login.dart';
 import 'package:bestengineer/screen/reports/areawise_report.dart';
+import 'package:bestengineer/screen/reports/calendar_reports.dart';
 import 'package:bestengineer/screen/reports/confirmed_quot_report.dart';
 import 'package:bestengineer/screen/reports/customerwiseReport.dart';
 import 'package:bestengineer/screen/reports/dealerWiseReport.dart';
@@ -234,10 +235,11 @@ class _EnqHomeState extends State<EnqHome> {
 
       case "DLR":
         {
-          Provider.of<Controller>(context, listen: false).fromDate =todaydate.toString();
+          Provider.of<Controller>(context, listen: false).fromDate =
+              todaydate.toString();
           Provider.of<Controller>(context, listen: false).dailyReport(context);
           Provider.of<Controller>(context, listen: false)
-              .getdailyReport(context,todaydate.toString());
+              .getdailyReport(context, todaydate.toString());
           return DailyReport();
         }
       case "E2":
@@ -330,10 +332,8 @@ class _EnqHomeState extends State<EnqHome> {
       case "DR1":
         {
           print("srghhh");
-          Provider.of<QuotationController>(context, listen: false).fromDate =
-              null;
-          Provider.of<QuotationController>(context, listen: false).todate =
-              null;
+          Provider.of<QuotationController>(context, listen: false).fromDate = null;
+          Provider.of<QuotationController>(context, listen: false).todate = null;
           Provider.of<QuotationController>(context, listen: false)
               .getDealerWiseReport(context, todaydate!, todaydate!);
           return DealerWiseReport();
@@ -435,6 +435,18 @@ class _EnqHomeState extends State<EnqHome> {
             context,
           );
           return ConfirmedQuotation();
+        }
+
+      case "CL":
+        {
+          // FocusManager.instance.primaryFocus!.unfocus();
+
+          // Provider.of<ProductController>(context, listen: false)
+          //     .getEnqhistoryData(
+          //   context,
+          //   "",
+          // );
+          return CalendarReports();
         }
     }
   }
@@ -798,7 +810,8 @@ class _EnqHomeState extends State<EnqHome> {
                               Provider.of<RegistrationController>(context, listen: false).menu_index == "CQ1" ||
                               Provider.of<RegistrationController>(context, listen: false).menu_index == "SA1" ||
                               Provider.of<RegistrationController>(context, listen: false).menu_index == "SA" ||
-                              Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR"
+                              Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR" ||
+                              Provider.of<RegistrationController>(context, listen: false).menu_index == "CL"
                           ? Container()
                           : InkWell(
                               onTap: () {
@@ -916,7 +929,8 @@ class _EnqHomeState extends State<EnqHome> {
                             Provider.of<RegistrationController>(context, listen: false).menu_index == "AP1" ||
                             Provider.of<RegistrationController>(context, listen: false).menu_index == "SA1" ||
                             Provider.of<RegistrationController>(context, listen: false).menu_index == "SA" ||
-                            Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR"
+                            Provider.of<RegistrationController>(context, listen: false).menu_index == "DLR" ||
+                            Provider.of<RegistrationController>(context, listen: false).menu_index == "CL"
                         ? P_Settings.loginPagetheme
                         : P_Settings.whiteColor,
                     elevation: 1,
@@ -940,9 +954,9 @@ class _EnqHomeState extends State<EnqHome> {
                                         value.menu_index == "AP1" ||
                                         value.menu_index == "CQ1" ||
                                         value.menu_index == "SA1" ||
-                                        value.menu_index == "SA"||
-                                        value.menu_index == "DLR"
-
+                                        value.menu_index == "SA" ||
+                                        value.menu_index == "DLR" ||
+                                        value.menu_index == "CL"
                                     ? P_Settings.whiteColor
                                     : Colors.grey[800]));
                       },

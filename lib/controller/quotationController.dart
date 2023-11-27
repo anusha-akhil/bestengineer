@@ -7,6 +7,7 @@ import 'package:bestengineer/screen/Enquiry/enqHome.dart';
 import 'package:bestengineer/screen/Quotation/testPage.dart';
 import 'package:bestengineer/screen/sale%20order/pending_sale_order.dart';
 import 'package:bestengineer/widgets/alertCommon/pending_list.dart';
+import 'package:bestengineer/widgets/alertCommon/pending_quot_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,13 +29,17 @@ import '../widgets/alertCommon/set_schedule_date_popup.dart';
 
 class QuotationController extends ChangeNotifier {
   String? todaydate;
+  bool isSearch = false;
   String? qt_pre;
   String? staffSelId;
   bool isLoading = false;
   String? reportdealerselected;
   String? enq_id;
+  List<bool> expandContainer = [];
   String? area;
   int? sivd;
+  bool isPendingQuotList = false;
+
   bool isPendingListLoading = false;
   double sale_order_net_amt = 0.0;
   bool ispdfOpend = false;
@@ -48,6 +53,8 @@ class QuotationController extends ChangeNotifier {
   String? fromDate;
   String? todate;
   List<Container> listWidget = [];
+  List<Container> calendarWidget = [];
+
   String? branchselected;
   List<Map<String, dynamic>> branchList = [
     {"id": "0", "value": "kannur"},
@@ -77,9 +84,8 @@ class QuotationController extends ChangeNotifier {
   double s_total_disc = 0.0;
   bool fromApi = true;
   bool isPdfLoading = false;
-
   bool isQuotLoading = false;
-
+  List<Map<String, dynamic>> quotremarkChatList = [];
   double taxable_rate = 0.0;
   double tax = 0.0;
   double cgst_amt = 0.0;
@@ -99,6 +105,10 @@ class QuotationController extends ChangeNotifier {
   List<TextEditingController> quotqty = [];
   List<TextEditingController> discount_amount = [];
   List<Map<String, dynamic>> staff_list = [];
+  List<Map<String, dynamic>> userLogList = [];
+  List<Map<String, dynamic>> usergpother = [];
+  List<Map<String, dynamic>> usergp1 = [];
+  List<Map<String, dynamic>> pending_quotation_list = [];
 
   bool isDetailLoading = false;
 
@@ -111,6 +121,9 @@ class QuotationController extends ChangeNotifier {
   List<Map<String, dynamic>> adminDashTileDetail = [];
   List<Map<String, dynamic>> enqScheduleList = [];
   List<Map<String, dynamic>> confrimedQuotList = [];
+  List<Map<String, dynamic>> calendar_reports_list = [];
+  List<Map<String, dynamic>> filteredList = [];
+
   String? selected;
   List<Map<String, dynamic>> masterPdf = [];
   List<Map<String, dynamic>> detailPdf = [];
@@ -131,6 +144,8 @@ class QuotationController extends ChangeNotifier {
   List<Map<String, dynamic>> pendingServiceList = [];
   List<Map<String, dynamic>> pendingQuotationList = [];
   List<Map<String, dynamic>> saleOrderList = [];
+  List<Map<String, dynamic>> pendingworklist = [];
+  List<Map<String, dynamic>> pendingworkDetails = [];
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   String rawCalculation(
@@ -1532,6 +1547,106 @@ class QuotationController extends ChangeNotifier {
     });
   }
 
+  /////////////////////////////////////////////////////////////////
+  getQuotPreviousChat(String s_invoice_id, BuildContext context, String type) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+          String? qutation_id1 = prefs.getString("qutation_id");
+
+          String? staff_nam = prefs.getString("staff_name");
+          isChatLoading = true;
+          notifyListeners();
+          // notifyListeners();
+          Uri url = Uri.parse("$commonurlgolabl/fetch_prev_qtn_remrk.php");
+          Map body = {
+            "s_invoice_id": s_invoice_id,
+          };
+
+          print("chat---service---$body");
+
+          http.Response response = await http.post(
+            url,
+            body: body,
+          );
+          var map = jsonDecode(response.body);
+          print("quot chat service map----$map");
+          if (type == "rm view") {
+            usergp1.clear();
+            usergpother.clear();
+            for (var item in map) {
+              if (item["usergroup"] == "1") {
+                usergp1.add(item);
+              } else {
+                usergpother.add(item);
+              }
+            }
+          } else {
+            quotremarkChatList.clear();
+            for (var item in map) {
+              quotremarkChatList.add(item);
+            }
+          }
+
+          isChatLoading = false;
+          notifyListeners();
+        } catch (e) {
+          print(e);
+          // return null;
+          return [];
+        }
+      }
+    });
+  }
+
+  /////////////////////////////////////////////////////////
+  saveQuotServiceChat(
+      String inv_id, String next_date, String remark, BuildContext context) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+          String? qutation_id1 = prefs.getString("qutation_id");
+
+          String? staff_nam = prefs.getString("staff_name");
+          // isChatLoading = true;
+          // notifyListeners();
+          // notifyListeners();
+          Uri url = Uri.parse("$commonurlgolabl/save_qtn_remarks.php");
+          Map body = {
+            "s_invoice_id": inv_id,
+            "next_date": next_date,
+            "added_by": user_id,
+            "remarks": remark
+          };
+
+          print("save chat---$body");
+
+          http.Response response = await http.post(
+            url,
+            body: body,
+          );
+          var map = jsonDecode(response.body);
+          print(" quot svae chat map----$map");
+          if (map["flag"] == 0) {
+            getQuotPreviousChat(inv_id, context, "");
+          }
+          // isChatLoading = false;
+          // notifyListeners();
+        } catch (e) {
+          print(e);
+          // return null;
+          return [];
+        }
+      }
+    });
+  }
+
   ///////////////////////////////////
   setDate(String date1, String date2) {
     fromDate = date1;
@@ -2027,7 +2142,7 @@ class QuotationController extends ChangeNotifier {
               cid = item["c_id"];
             }
             print("item----${item["product_name"]}");
-            listWidget.add((Container(
+            listWidget.add(Container(
               child: Card(
                 elevation: 4,
                 child: Padding(
@@ -2071,7 +2186,7 @@ class QuotationController extends ChangeNotifier {
                   ),
                 ),
               ),
-            )));
+            ));
 
             // areaWiseReportList.add(item);
           }
@@ -2459,7 +2574,7 @@ class QuotationController extends ChangeNotifier {
           http.Response response = await http.post(url, body: body);
           var map = jsonDecode(response.body);
           print("get count map----${map}");
-
+          loadPendingQuotations(context);
           int cnt = int.parse(map["cnt"]);
           if (cnt > 0) {
             getTodaysPendingList(context, date);
@@ -2539,6 +2654,52 @@ class QuotationController extends ChangeNotifier {
             pendingList.buildPendingPopup(context, MediaQuery.of(context).size);
           }
           notifyListeners();
+        } catch (e) {
+          print(e);
+          // return null;
+          return [];
+        }
+      }
+    });
+  }
+
+//////////////////////////////////////////////////////////
+  loadPendingQuotations(BuildContext context) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        DateFind dateFind = DateFind();
+        String? todaydate;
+        try {
+          todaydate = DateFormat('dd-MM-yyyy').format(DateTime.now());
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+          isPendingQuotList = true;
+          notifyListeners();
+          Uri url = Uri.parse("$commonurlgolabl/load_pending_qtns.php");
+
+          http.Response response = await http.post(
+            url,
+          );
+          var map = jsonDecode(response.body);
+          pending_quotation_list.clear();
+          for (var item in map) {
+            pending_quotation_list.add(item);
+          }
+
+          if (map != null) {
+            // staffSelected = to_staff.toString();
+            for (var item in map) {
+              pending_quotation_list.add(item);
+            }
+          }
+          isPendingQuotList = false;
+          notifyListeners();
+          if (pending_quotation_list.length > 0) {
+            PendingQuotationList list = PendingQuotationList();
+            list.buildPendingPopup(context);
+          }
+          print("load_pending_qtns map----${pending_quotation_list}");
         } catch (e) {
           print(e);
           // return null;
@@ -2667,8 +2828,9 @@ class QuotationController extends ChangeNotifier {
     });
   }
 
+///////////////////////////////////////////////////////////////////////////////////////////////
   saveNextScheduleDate(String date, String inv_id, String enq_id,
-      BuildContext context, String staff_id) {
+      BuildContext context, String staff_id, String alert_type) {
     NetConnection.networkConnection(context).then((value) async {
       if (value == true) {
         try {
@@ -2714,14 +2876,311 @@ class QuotationController extends ChangeNotifier {
               fontSize: 14.0,
               backgroundColor: Colors.green,
             );
-            getTodaysPendingList(context, todaydate!);
-            Navigator.pop(context);
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            if (alert_type == "pen all") {
+              getTodaysPendingList(context, todaydate!);
+            } else if (alert_type == "pen quot") {
+              loadPendingQuotations(context);
+            }
+            // Navigator.pop(context);
           }
           // isQuotLoading = false;
           // notifyListeners();
         } catch (e) {
           print(e);
           // return null;
+          return [];
+        }
+      }
+    });
+  }
+
+  //////////////////////////////////////////////////////////////
+  fetchCalendarReports(
+    String s_date,
+    String rep_type,
+    BuildContext context,
+  ) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+          String? qutation_id1 = prefs.getString("qutation_id");
+          String? staff_nam = prefs.getString("staff_name");
+          isLoading = true;
+          notifyListeners();
+          Uri url = Uri.parse("$commonurlgolabl/fetch_calaneder_report.php");
+          Map body = {
+            's_date': s_date,
+            "rpt_type": rep_type,
+          };
+          print("body cal------------$body");
+          var jsonEnc = jsonEncode(body);
+          http.Response response = await http.post(
+            url,
+            body: body,
+          );
+          var map = jsonDecode(response.body);
+          print("fetch calendar-----$map");
+          if (rep_type == "1") {
+            userLogList.clear();
+            for (var item in map) {
+              userLogList.add(item);
+            }
+            makeuserLogContainer(userLogList);
+          } else {
+            pendingworklist.clear();
+            for (var item in map) {
+              pendingworklist.add(item);
+            }
+            expandContainer = List.generate(
+                pendingworklist.length, (index) => false,
+                growable: true);
+          }
+          isLoading = false;
+          notifyListeners();
+        } catch (e) {
+          print(e);
+          return [];
+        }
+      }
+    });
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////
+  makeuserLogContainer(List<Map<String, dynamic>> list) {
+    String? name;
+    calendarWidget.clear();
+    for (var item in list) {
+      if (name != item["NAME"]) {
+        calendarWidget.add(Container(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    item["NAME"].toString().toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
+        // if (item["date_time"] != null || item["date_time"].isNotEmpty) {
+        //   name = item["NAME"];
+        // }
+        name = item["NAME"];
+      }
+
+      calendarWidget.add(item["date_time"] == null || item["date_time"].isEmpty
+          ? Container()
+          : Container(
+              child: Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 4,
+                      ),
+                      item["date_time"] == null || item["date_time"].isEmpty
+                          ? Container()
+                          : Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_month,
+                                  size: 16,
+                                  color: Colors.deepPurple,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Flexible(
+                                    child: Text(
+                                  item["date_time"],
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color.fromARGB(
+                                          255, 44, 44, 44)),
+                                )),
+                              ],
+                            ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      item["mn_sries"] == null || item["mn_sries"].isEmpty
+                          ? Container()
+                          : Row(
+                              children: [
+                                Icon(
+                                  Icons.code,
+                                  size: 16,
+                                  color: Colors.green,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Flexible(
+                                    child: Text(
+                                  item["mn_sries"],
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600]),
+                                )),
+                              ],
+                            ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      item["mn_cust"] == null || item["mn_cust"].isEmpty
+                          ? Container()
+                          : Row(
+                              children: [
+                                Icon(
+                                  Icons.person,
+                                  size: 16,
+                                  color: Colors.blue,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Flexible(
+                                    child: Text(
+                                  item["mn_cust"],
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600]),
+                                )),
+                              ],
+                            ),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      item["remrk"] == null || item["remrk"].isEmpty
+                          ? Container()
+                          : Row(
+                              children: [
+                                Icon(
+                                  Icons.note,
+                                  size: 16,
+                                  color: Colors.red,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Flexible(
+                                    child: Text(
+                                  item["remrk"],
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color.fromARGB(
+                                          255, 44, 44, 44)),
+                                )),
+                              ],
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+            ));
+      isLoading = false;
+
+      notifyListeners();
+    }
+  }
+
+////////////////////////////////////////////////
+  searchuserLog(String val, String type) {
+    if (val.isNotEmpty) {
+      isSearch = true;
+      notifyListeners();
+      if (type == "1") {
+        filteredList = userLogList
+            .where((e) =>
+                e["NAME"].toLowerCase().startsWith(val.toLowerCase()) ||
+                e["mn_cust"].toLowerCase().startsWith(val.toLowerCase()) ||
+                e["mn_sries"].toLowerCase().startsWith(val.toLowerCase()))
+            .toList();
+      } else {
+        filteredList = pendingworklist
+            .where((e) =>
+                e["s_invoice_no"].toLowerCase().startsWith(val.toLowerCase()) ||
+                e["s_customer_name"]
+                    .toLowerCase()
+                    .startsWith(val.toLowerCase()))
+            .toList();
+      }
+    } else {
+      if (type == "1") {
+        filteredList = userLogList;
+      } else if (type == "2") {
+        filteredList = pendingworklist;
+      }
+    }
+    print("filterd list------------${filteredList}");
+
+    makeuserLogContainer(filteredList);
+
+    notifyListeners();
+  }
+
+  setIsSearch(bool val, String type) {
+    isSearch = val;
+    if (type == "1") {
+      makeuserLogContainer(userLogList);
+    }
+    notifyListeners();
+  }
+
+////////////////////////////////////////////////////////////
+  fetchQuotationDetails(
+    String s_invoice_id,
+    String type,
+    BuildContext context,
+  ) {
+    NetConnection.networkConnection(context).then((value) async {
+      if (value == true) {
+        try {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? branch_id = prefs.getString("branch_id");
+          String? user_id = prefs.getString("user_id");
+          String? qutation_id1 = prefs.getString("qutation_id");
+          String? staff_nam = prefs.getString("staff_name");
+          isLoading = true;
+          notifyListeners();
+          Uri url = Uri.parse("$commonurlgolabl/fetch_qtn_details.php");
+          Map body = {
+            's_invoice_id': s_invoice_id,
+            "type": type,
+          };
+          print("body cal------------$body");
+          var jsonEnc = jsonEncode(body);
+          http.Response response = await http.post(
+            url,
+            body: body,
+          );
+          var map = jsonDecode(response.body);
+          print("fetch quot details-----$map");
+          pendingworkDetails.clear();
+          for (var item in map) {
+            pendingworkDetails.add(item);
+          }
+          isLoading = false;
+          notifyListeners();
+        } catch (e) {
+          print(e);
           return [];
         }
       }

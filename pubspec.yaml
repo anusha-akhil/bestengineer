@@ -89,6 +89,8 @@ dependencies:
   webview_flutter: ^4.4.1
   expansion_tile_card: ^3.0.0
   flutter_sound: ^9.2.13
+  table_calendar: ^3.0.9
+  pinput: ^3.0.1
 
 
   

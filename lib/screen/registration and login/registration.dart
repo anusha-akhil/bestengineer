@@ -21,6 +21,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   FocusNode? fieldFocusNode;
   TextEditingController codeController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
+  TextEditingController gmailController = TextEditingController();
+
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -88,7 +90,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         resizeToAvoidBottomInset: true,
         body: InkWell(
           onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
+            // FocusScope.of(context).requestFocus(FocusNode());
           },
           child: SingleChildScrollView(
             reverse: true,
@@ -103,7 +105,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 18.0),
                             child: Container(
-                                height: 500,
+                                height:450,
                                 width: 300,
                                 child: SvgPicture.asset(
                                   "assets/signup.svg",
@@ -142,9 +144,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               "company key", context),
                           customTextField("Phone number", phoneController,
                               "phone", context),
-
+                          customTextField(
+                              "gmail", gmailController, "gmail", context),
                           SizedBox(
-                            height: size.height * 0.04,
+                            height: size.height * 0.02,
                           ),
                           Container(
                             width: size.width * 0.4,
@@ -186,6 +189,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                             tempFp1,
                                             phoneController.text,
                                             deviceInfo,
+                                            gmailController.text,
                                             context);
                                   }
                                 },
@@ -261,11 +265,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     double topInsets = MediaQuery.of(context).viewInsets.top;
     Size size = MediaQuery.of(context).size;
     return Container(
-      height: size.height * 0.09,
+      // height: size.height * 0.09,
       child: Padding(
-          padding: const EdgeInsets.only(top: 16.0, left: 16, right: 16),
+          padding: const EdgeInsets.only( left: 16, right: 16,top:8),
           child: TextFormField(
-            keyboardType: type == "phone" ? TextInputType.number : null,
+            keyboardType: type == "phone"
+                ? TextInputType.number
+                : type == "gmail"
+                    ? TextInputType.emailAddress
+                    : null,
             style: TextStyle(color: P_Settings.loginPagetheme),
             // scrollPadding:
             //     EdgeInsets.only(bottom: topInsets + size.height * 0.34),
@@ -277,10 +285,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         Icons.business,
                         color: P_Settings.loginPagetheme,
                       )
-                    : Icon(
-                        Icons.phone,
-                        color: P_Settings.loginPagetheme,
-                      ),
+                    : type == "gmail"
+                        ? Icon(
+                            Icons.mail,
+                            color: P_Settings.loginPagetheme,
+                          )
+                        : Icon(
+                            Icons.phone,
+                            color: P_Settings.loginPagetheme,
+                          ),
                 focusedBorder: OutlineInputBorder(
                   borderSide:
                       BorderSide(color: P_Settings.lightPurple, width: 2.0),
@@ -316,7 +329,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 return 'Please Enter ${hinttext}';
               } else if (type == "phone" && text.length != 10) {
                 return 'Please Enter Valid Phone No ';
-              }
+              } else if (type == "gmail" &&
+                  text.length > 5 &&
+                  text.contains('@') &&
+                  text.endsWith('.com')) {}
               return null;
             },
           )),

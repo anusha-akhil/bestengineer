@@ -9,6 +9,7 @@ import 'package:bestengineer/model/registrationModel.dart';
 import 'package:bestengineer/model/staffDetailsModel.dart';
 import 'package:bestengineer/screen/Enquiry/enqHome.dart';
 import 'package:bestengineer/screen/registration%20and%20login/login.dart';
+import 'package:bestengineer/screen/registration%20and%20login/otp_page.dart';
 
 import 'package:bestengineer/services/dbHelper.dart';
 import 'package:flutter/material.dart';
@@ -73,6 +74,7 @@ class RegistrationController extends ChangeNotifier {
       String? fingerprints,
       String phoneno,
       String deviceinfo,
+      String email,
       BuildContext context) async {
     NetConnection.networkConnection(context).then((value) async {
       print("Text fp...$fingerprints---$company_code---$phoneno---$deviceinfo");
@@ -119,6 +121,8 @@ class RegistrationController extends ChangeNotifier {
               String? fp1 = regModel.fp;
               print("fingerprint......$fp1");
               prefs.setString("fp", fp!);
+              prefs.setString("ph", phoneno);
+              prefs.setString("email", email);
               String? os = regModel.os;
               regModel.c_d![0].cid;
               cid = regModel.cid;
@@ -133,36 +137,32 @@ class RegistrationController extends ChangeNotifier {
                 print("ciddddddddd......$item");
                 c_d.add(item);
               }
-              // verifyRegistration(context, "");
-
-              isLoading = false;
-              notifyListeners();
-
+              // isLoading = false;
+              // notifyListeners();
               prefs.setString("os", os!);
-
-              // prefs.setString("cname", cname!);
-
               String? user = prefs.getString("userType");
-
               print("fnjdxf----$user");
-
               await BestEngineer.instance
                   .deleteFromTableCommonQuery("companyRegistrationTable", "");
               var res = await BestEngineer.instance
                   .insertRegistrationDetails(regModel);
-              // getMaxSerialNumber(os);
-              // getMenuAPi(cid!, fp1, company_code, context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
-              );
+              saveRegistrationFun(
+                  phoneno, fingerprints!, deviceinfo, email, context);
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => LoginPage()),
+              // );
             } else {
+              isLoading = false;
+              notifyListeners();
               CustomSnackbar snackbar = CustomSnackbar();
               snackbar.showSnackbar(context, "Invalid Apk Key", "");
             }
           }
           /////////////////////////////////////////////////////
           if (sof == "0") {
+            isLoading = false;
+            notifyListeners();
             CustomSnackbar snackbar = CustomSnackbar();
             snackbar.showSnackbar(context, msg.toString(), "");
           }
@@ -174,6 +174,73 @@ class RegistrationController extends ChangeNotifier {
         }
       }
     });
+  }
+
+  /////////////////////////////////////////////////////////////////
+  Future<StaffDetails?> saveRegistrationFun(String mobile, String fp,
+      String dev, String email, BuildContext context) async {
+    try {
+      Uri url = Uri.parse("$commonurlgolabl/save_registration.php");
+      Map body = {
+        'mobile': mobile,
+        'fingerprint': fp,
+        'device_name': dev,
+        'email': email
+      };
+      http.Response response = await http.post(
+        url,
+        body: body,
+      );
+      var map = jsonDecode(response.body);
+      isLoading = false;
+      notifyListeners();
+      print("save reg---------$map");
+      if (map["flag"] == 0) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => OtpPage()),
+        );
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  /////////////////////////////////////////////////////////////////
+  Future<StaffDetails?> otpValidation(String otp, BuildContext context) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      Uri url = Uri.parse("$commonurlgolabl/validate_otp.php");
+      String? fp = prefs.getString("fp");
+      String? mob = prefs.getString("ph");
+      String? email = prefs.getString("email");
+      isLoading = true;
+      notifyListeners();
+      Map body = {'mobile': mob, 'fingerprint': fp, 'otp': otp, 'email': email};
+      http.Response response = await http.post(
+        url,
+        body: body,
+      );
+      var map = jsonDecode(response.body);
+      isLoading = false;
+      notifyListeners();
+      print("otp validation-----$map");
+      if (map["cnt"] == "1") {
+        prefs.setString("otp", otp);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }else if (map["cnt"] == "0") {
+        CustomSnackbar snackbar = CustomSnackbar();
+        snackbar.showSnackbar(context, "Invalid Otp", "");
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   /////////////////////////////////////////////////////////////////
@@ -228,43 +295,6 @@ class RegistrationController extends ChangeNotifier {
       return null;
     }
   }
-
-  //////////////////////////////////////////////////////////////////
-  // Future<StaffDetails?> getStaffDetails(String cid, int index) async {
-  //   print("getStaffDetails...............${cid}");
-  //   var restaff;
-  //   try {
-  //     Uri url = Uri.parse("https://trafiqerp.in/order/fj/get_staff.php");
-  //     Map body = {
-  //       'cid': cid,
-  //     };
-  //     // isDownloaded = true;
-  //     // isCompleted = true;
-  //     isLoading = true;
-  //     notifyListeners();
-  //     http.Response response = await http.post(
-  //       url,
-  //       body: body,
-  //     );
-  //     List map = jsonDecode(response.body);
-  //     await BestEngineer.instance
-  //         .deleteFromTableCommonQuery("staffDetailsTable", "");
-  //     print("map ${map}");
-  //     for (var staff in map) {
-  //       staffModel = StaffDetails.fromJson(staff);
-  //       restaff = await BestEngineer.instance.insertStaffDetails(staffModel);
-  //     }
-  //     print("inserted staff ${restaff}");
-  //     // isDownloaded = false;
-  //     // isDown[index] = true;
-  //     isLoading = false;
-  //     notifyListeners();
-  //     return staffModel;
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
 
 //////////////////////////////////////////////////////////////////////////////
   getMenu(
@@ -721,9 +751,7 @@ class RegistrationController extends ChangeNotifier {
           String? qutation_id1 = prefs.getString("qutation_id");
 
           String? staff_nam = prefs.getString("staff_name");
-          // isChatLoading = true;
-          // notifyListeners();
-          // notifyListeners();
+
           Uri url = Uri.parse("$commonurlgolabl/load_dashboard.php");
 
           Map body = {

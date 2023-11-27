@@ -16,6 +16,7 @@ class DailyReport extends StatefulWidget {
 
 class _DailyReportState extends State<DailyReport> {
   final _formKey = GlobalKey<FormState>();
+  bool setrefresh = false;
   ValueNotifier<bool> validph = ValueNotifier(false);
   DateFind dateFind = DateFind();
   DateTime d = DateTime.now();
@@ -49,12 +50,11 @@ class _DailyReportState extends State<DailyReport> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
-        date = DateFormat('dd-MM-yyyy').format(selectedDate);
-        Provider.of<Controller>(context, listen: false)
-            .setDate(date.toString());
+        String d = DateFormat('dd-MM-yyyy').format(selectedDate);
+        Provider.of<Controller>(context, listen: false).setDate(d.toString());
 
         Provider.of<Controller>(context, listen: false)
-            .getdailyReport(context, date.toString());
+            .getdailyReport(context, d.toString());
       });
     }
   }
@@ -64,6 +64,8 @@ class _DailyReportState extends State<DailyReport> {
 
   ValueNotifier<bool> visiblename = ValueNotifier(false);
   ValueNotifier<bool> visibleph = ValueNotifier(false);
+  ValueNotifier<bool> visibleremrk = ValueNotifier(false);
+
   TextEditingController name = TextEditingController();
   TextEditingController adress = TextEditingController();
   TextEditingController remark = TextEditingController();
@@ -147,19 +149,11 @@ class _DailyReportState extends State<DailyReport> {
                                     return null;
                                   }
                                 },
-                                // validator: (text) {
-                                //   if (text == null || text.isEmpty) {
-                                //     visible.value = true;
-                                //     return visible.value.toString();
-                                //     // return 'Please Enter Phone Number';
-                                //   } else {
-                                //     visible.value = false;
-                                //   }
-                                //   return null;
-                                // },
-                                // scrollPadding: EdgeInsets.only(
-                                //     bottom: topInsets + size.height * 0.4),
+
                                 onChanged: (value) {
+                                  setState(() {
+                                    setrefresh = false;
+                                  });
                                   name.text = fieldText.text;
                                   visiblename.value = false;
                                   adress.clear();
@@ -210,7 +204,7 @@ class _DailyReportState extends State<DailyReport> {
                                   ),
                                 ),
                                 textInputAction: TextInputAction.next,
-                                controller: fieldText,
+                                controller: setrefresh ? name : fieldText,
                                 // controller:
                                 //     name.text.isNotEmpty ? name : fieldText,
                                 focusNode: fieldFocusNode,
@@ -457,6 +451,26 @@ class _DailyReportState extends State<DailyReport> {
                                 ),
                               ),
                             ),
+                            Container(
+                              margin: EdgeInsets.only(top: 5),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  ValueListenableBuilder(
+                                      valueListenable: visibleremrk,
+                                      builder: (BuildContext context, bool v,
+                                          Widget? child) {
+                                        return Visibility(
+                                          visible: v,
+                                          child: Text(
+                                            "Please Enter remark",
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                        );
+                                      }),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                         SizedBox(
@@ -476,7 +490,11 @@ class _DailyReportState extends State<DailyReport> {
                                   visibleph.value = true;
                                 } else if (phone.text.length != 10) {
                                   validph.value = true;
+                                } else if (remark.text == null ||
+                                    remark.text.isEmpty) {
+                                  visibleremrk.value = true;
                                 } else {
+                                  visibleremrk.value = false;
                                   validph.value = false;
                                   visibleph.value = false;
                                   visiblename.value = false;
@@ -509,11 +527,14 @@ class _DailyReportState extends State<DailyReport> {
                                   Provider.of<Controller>(context,
                                           listen: false)
                                       .setDate(today.toString());
-                                  // name.clear();
-                                  // remark.clear();
-                                  // phone.clear();
-                                  // adress.clear();
-                                  // custId = "";
+                                  name.clear();
+                                  remark.clear();
+                                  phone.clear();
+                                  adress.clear();
+                                  custId = "";
+                                  setState(() {
+                                    setrefresh = true;
+                                  });
                                 }
                               },
                               child: Text(
@@ -628,7 +649,7 @@ class _DailyReportState extends State<DailyReport> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      date == today
+                                      value.fromDate == today
                                           ? InkWell(
                                               onTap: () {
                                                 Navigator.push(
@@ -673,7 +694,7 @@ class _DailyReportState extends State<DailyReport> {
                                               ),
                                             )
                                           : Container(),
-                                      today == date
+                                      today == value.fromDate
                                           ? InkWell(
                                               onTap: () {
                                                 Provider.of<Controller>(context,

@@ -1,5 +1,6 @@
 import 'package:bestengineer/components/commonColor.dart';
 import 'package:bestengineer/controller/controller.dart';
+import 'package:bestengineer/screen/Enquiry/daily_report.dart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,6 +19,7 @@ class _DailyReportEditState extends State<DailyReportEdit> {
   TextEditingController phone = TextEditingController();
   String? date;
   String? c;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -39,112 +41,154 @@ class _DailyReportEditState extends State<DailyReportEdit> {
             onPressed: () {
               Provider.of<Controller>(context, listen: false)
                   .getdailyReport(context, date.toString());
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => DailyReport()),
+              );
             },
             icon: Icon(Icons.arrow_back)),
         backgroundColor: P_Settings.loginPagetheme,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.person),
-                border: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 20,
               ),
-              controller: name,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            TextFormField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.info),
-                border: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-              ),
-              controller: adress,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            TextFormField(
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.phone),
-                border: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-              ),
-              controller: phone,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            TextFormField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.note),
-                border: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.grey, width: 0.0),
-                ),
-              ),
-              controller: remark,
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    primary: P_Settings.loginPagetheme),
-                onPressed: () {
-                  Provider.of<Controller>(context, listen: false)
-                      .saveDailyReport(
-                          context,
-                          c.toString(),
-                          name.text,
-                          phone.text,
-                          adress.text,
-                          date!,
-                          remark.text,
-                          "1",
-                          "0");
+              TextFormField(
+                validator: (text) {
+                  if (text!.isEmpty) {
+                    return null;
+                  }
                 },
-                child: Text(
-                  "EDIT",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ))
-          ],
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.person),
+                  border: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                ),
+                controller: name,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                keyboardType: TextInputType.multiline,
+                validator: (text) {
+                  if (text!.isEmpty) {
+                    return null;
+                  }
+                },
+                maxLines: null,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.info),
+                  border: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                ),
+                controller: adress,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                validator: (text) {
+                  if (text!.isEmpty) {
+                    return null;
+                  }
+                },
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.phone),
+                  border: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                ),
+                controller: phone,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                validator: (text) {
+                  if (text!.isEmpty) {
+                    return null;
+                  }
+                },
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.note),
+                  border: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                ),
+                controller: remark,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      primary: P_Settings.loginPagetheme),
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      Provider.of<Controller>(context, listen: false)
+                          .saveDailyReport(
+                              context,
+                              c.toString(),
+                              name.text,
+                              phone.text,
+                              adress.text,
+                              date!,
+                              remark.text,
+                              "1",
+                              "0");
+                    }
+                  },
+                  child: Text(
+                    "EDIT",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ))
+            ],
+          ),
         ),
       ),
     );

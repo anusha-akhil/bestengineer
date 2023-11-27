@@ -227,8 +227,10 @@ class PendingList {
                                                     ),
                                                     DataCell(
                                                       onTap: () async {
-                                                        value
-                                                            .getStaffs(context,itemRow["to_staff"]);
+                                                        value.getStaffs(
+                                                            context,
+                                                            itemRow[
+                                                                "to_staff"]);
                                                         value.staffSelected =
                                                             itemRow["to_staff"];
                                                         NextSchedulePopup next =
@@ -243,7 +245,7 @@ class PendingList {
                                                             itemRow["enq_id"],
                                                             "quotation",
                                                             itemRow[
-                                                                "next_date"]);
+                                                                "next_date"],"pen all");
                                                       },
                                                       Container(
                                                         width: size.width * 0.2,
@@ -392,8 +394,10 @@ class PendingList {
                                                       onTap: () async {
                                                         value.staffSelected =
                                                             itemRow["to_staff"];
-                                                        value
-                                                            .getStaffs(context, itemRow["to_staff"]);
+                                                        value.getStaffs(
+                                                            context,
+                                                            itemRow[
+                                                                "to_staff"]);
                                                         NextSchedulePopup next =
                                                             NextSchedulePopup();
                                                         next.buildPendingPopup(
@@ -405,7 +409,7 @@ class PendingList {
                                                             itemRow["c_id"],
                                                             "",
                                                             itemRow[
-                                                                "ser_date"]);
+                                                                "ser_date"],"pen all");
                                                       },
                                                       Container(
                                                         width: size.width * .2,

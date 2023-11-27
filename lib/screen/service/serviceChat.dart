@@ -97,6 +97,7 @@ class _ServiceChatState extends State<ServiceChat> {
                     : Expanded(
                         child: ListView.builder(
                           itemCount: value.serviceChatList.length,
+                          shrinkWrap: true,
                           itemBuilder: (context, index) {
                             String rem = value.serviceChatList[index]["remarks"]
                                 .replaceAll("\n", " ");
